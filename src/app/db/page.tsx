@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import databaseService from "@/supabase/services/database";
 import { supabase } from "@/supabase/config";
+import { RealtimePostgresChangesPayload } from "@supabase/supabase-js";
 // import { randomInt } from "crypto";
 
 interface User {
@@ -22,8 +23,14 @@ export default function Home() {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "users" },
-        (payload: object) => {
+        (payload: RealtimePostgresChangesPayload<User>) => {
           console.log(payload);
+          if (payload.eventType === "INSERT") {
+            setData((data) => [...data, payload.new]);
+          }
+          if (payload.eventType === "DELETE") {
+            setData((data) => data.filter((d) => d.id !== payload.old.id));
+          }
         }
       )
       .subscribe();
@@ -53,15 +60,15 @@ export default function Home() {
       });
 
       //testing ke liye hard coded
-      setData([
-        ...data,
-        {
-          id: 1,
-          created_at: new Date(),
-          name: "kaif khan",
-          email: "kaif@email.com",
-        },
-      ]);
+      // setData([
+      //   ...data,
+      //   {
+      //     id: 1,
+      //     created_at: new Date(),
+      //     name: "kaif khan",
+      //     email: "kaif@email.com",
+      //   },
+      // ]);
     } catch (error) {
       if (error instanceof Error) {
         console.error(error);

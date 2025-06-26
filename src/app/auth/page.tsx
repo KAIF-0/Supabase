@@ -6,6 +6,10 @@ const Page = () => {
   const handleSignIn = async () => {
     const data = await authservice.signInWithOAuth("google");
     // const data = await authservice.signInWithOTP();
+    // const data = await authservice.verifyOTP({
+    //   email: "kaif8700979251@gmail.com",
+    //   token: "547673",
+    // });
     console.log(data);
   };
   const handleSignOut = async () => {
