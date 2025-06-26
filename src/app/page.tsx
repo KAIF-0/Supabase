@@ -2,60 +2,43 @@
 
 // import { supabase } from "@/supabase/config";
 import { useEffect, useState } from "react";
-import databaseService from "@/supabase/services/database";
+import authservice from "@/supabase/services/authentication";
+import { Session, User } from "@supabase/supabase-js";
 // import { randomInt } from "crypto";
 
-interface User {
-  id: number;
-  created_at: Date;
-  name: string;
-  email: string;
-}
+// interface User {
+//   id: number;
+//   created_at: Date;
+//   name: string;
+//   email: string;
+// }
 
 export default function Home() {
-  const [data, setData] = useState<User[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     try {
-      databaseService.getUsers().then((data) => {
-        setData(data);
-      });
+      fetchCurrentData();
     } catch (error) {
       if (error instanceof Error) {
-        console.error(error);
+        console.error(error.message);
       }
     }
   }, []);
 
-  async function addUser() {
-    try {
-      await databaseService.addUser({
-        name: "kaif khan",
-        email: "kaif@email.com",
-      });
-
-      //testing ke liye hard coded
-      setData([
-        ...data,
-        {
-          id: 1,
-          created_at: new Date(),
-          name: "kaif khan",
-          email: "kaif@email.com",
-        },
-      ]);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error);
-      }
-    }
-  }
+  const fetchCurrentData = async () => {
+    const data = await authservice.getUser();
+    console.log(data);
+    setUser(data.user);
+    setSession(data.session);
+  };
 
   return (
     <div>
-      <h1>USER DATA</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
-      <button onClick={addUser}>Add User</button>
+      <h1>PRESENT USER INFO</h1>
+      <pre>USER : {JSON.stringify(user, null, 2)}</pre>
+      <pre>SESSION : {JSON.stringify(session, null, 2)}</pre>
     </div>
   );
 }
